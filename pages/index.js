@@ -3,8 +3,8 @@ import { useState } from "react";
 import styles from "./index.module.css";
 
 export default function Home() {
-  const [animalInput, setAnimalInput] = useState("");
-  const [result, setResult] = useState();
+  const [questionInput, setQuestionInput] = useState("");
+  const [result, setResult] = useState([]);
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -14,7 +14,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ animal: animalInput }),
+        body: JSON.stringify({ questions: questionInput.split(/\r?\n/) }),
       });
 
       const data = await response.json();
@@ -23,9 +23,8 @@ export default function Home() {
       }
 
       setResult(data.result);
-      setAnimalInput("");
-    } catch(error) {
-      // Consider implementing your own error handling logic here
+      setQuestionInput("");
+    } catch (error) {
       console.error(error);
       alert(error.message);
     }
@@ -34,24 +33,32 @@ export default function Home() {
   return (
     <div>
       <Head>
-        <title>OpenAI Quickstart</title>
-        <link rel="icon" href="/dog.png" />
+        <title>RFP Answering Tool</title>
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
-        <img src="/dog.png" className={styles.icon} />
-        <h3>Name my pet</h3>
+        <h3>RFP Answering Tool</h3>
         <form onSubmit={onSubmit}>
-          <input
-            type="text"
-            name="animal"
-            placeholder="Enter an animal"
-            value={animalInput}
-            onChange={(e) => setAnimalInput(e.target.value)}
+          <textarea
+            name="questions"
+            placeholder="Enter RFP questions separated by new lines"
+            value={questionInput}
+            onChange={(e) => setQuestionInput(e.target.value)}
+            rows={10}
           />
-          <input type="submit" value="Generate names" />
+          <input type="submit" value="Generate answers" />
         </form>
-        <div className={styles.result}>{result}</div>
+        <div className={styles.result}>
+          {result.map((answer, index) => (
+            <div key={index} className={styles.answerContainer}>
+              <div className={styles.question}>
+                <strong>Q{index + 1}:</strong>
+              </div>
+              <div className={styles.answer}>{answer}</div>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   );
